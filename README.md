@@ -1,5 +1,5 @@
 ### how to use
-```
+```html
 <div class="imitate_select name-select">
   <div class="show_select">
     <span class="show_item">文件后缀文件后缀</span>
@@ -14,7 +14,7 @@
 ```
 调用
 
-```
+```javascript
 require("select_simulate.css");
 require("./jquery.select.js");
 var select_map = new WeakMap()
