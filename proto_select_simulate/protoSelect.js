@@ -1,12 +1,14 @@
 var changeClass = require('./protoChangeClass').default;
 
-var proto_select_simulate = (function() {
+var proto_select_simulate = (() => {
   var select_map;
+  var select_all_nodes = [];
+  var documentEvent = false;
 
   function heightSlide(node, status) {
     var height = 0;
     if (status) {
-      Array.prototype.slice.call(node.childNodes).forEach(function(child) {
+      Array.prototype.slice.call(node.childNodes).forEach((child) => {
         if (child.nodeType === 1) {
           var oStyle = window.getComputedStyle(child);
           height = height + child.clientHeight + (parseInt(
@@ -26,52 +28,54 @@ var proto_select_simulate = (function() {
     return node;
   }
   var oManager = {
-    setMapBindClass: function(node, obj) {
-      var status = !select_map.has(node);
-      if (status) {
-        select_map.set(node, obj)
-        changeClass.call(node, this.getNodeofMap(node));
-      }
-      return status;
-    },
-    getNodeofMap: function(node) {
-      return select_map.get(node);
-    },
-    getStatus: function(node, className) {
-      return select_map.get(node)[className];
-    },
-    setStatus: function(node, className, bool) {
-      select_map.get(node)[className] = bool;
-    },
-    reverseStatus: function(node, className) {
-      this.getNodeofMap(node)[className] = !this.getNodeofMap(node)[
-        className]
-    },
-    getDomArray: function(nodes) {
-      return Array.prototype.slice.call(nodes);
-    },
-    slideUp: function(node) {
-      var show_select_node = node.previousSibling;
-      if (select_map.has(node)) {
-        this.setStatus(node, "hide_select", true);
-      }
+    setMapBindClass(node, obj) {
+        var status = !select_map.has(node);
+        if (status) {
+          select_map.set(node, obj)
+          changeClass.call(node, this.getNodeofMap(node));
+        }
+        return status;
+      },
+      getNodeofMap(node) {
+        return select_map.get(node);
+      },
+      getStatus(node, className) {
+        return select_map.get(node)[className];
+      },
+      setStatus(node, className, bool) {
+        select_map.get(node)[className] = bool;
+      },
+      reverseStatus(node, className) {
+        this.getNodeofMap(node)[className] = !this.getNodeofMap(node)[
+          className]
+      },
+      getDomArray(nodes) {
+        return Array.prototype.slice.call(nodes);
+      },
+      slideUp(node) {
+        var show_select_node = node.previousSibling;
+        if (select_map.has(node)) {
+          this.setStatus(node, "hide_select", true);
+        }
 
-      if (select_map.has(show_select_node)) {
-        this.setStatus(show_select_node, "noborder", false);
-      }
+        if (select_map.has(show_select_node)) {
+          this.setStatus(show_select_node, "noborder", false);
+        }
 
-      heightSlide(node, false);
-    }
+        heightSlide(node, false);
+      }
   }
   return function(options) {
     select_map = options.select_map || new WeakMap();
     var show_select = this.querySelectorAll(".show_select");
-    var select_all_nodes = this.querySelectorAll(".select_all");
+    select_all_nodes.push(this.querySelector(".select_all"));
+    // var select_all_nodes = this.querySelectorAll(".select_all");
     var select_item = "select_item"
     var imitate_select = this;
     var select_all_array = oManager.getDomArray(select_all_nodes);
+    // console.log(select_all_array)
     var show_select_array = oManager.getDomArray(show_select);
-    show_select_array.forEach(function(ele) {
+    show_select_array.forEach((ele) => {
       ele.addEventListener("click", function(event) {
         event.stopPropagation();
         oManager.setMapBindClass(this, {
@@ -89,7 +93,7 @@ var proto_select_simulate = (function() {
         oManager.reverseStatus(this, "noborder");
         var select_all_array = oManager.getDomArray(
           select_all_nodes);
-        select_all_array.forEach(function(ele) {
+        select_all_array.forEach((ele) => {
           if (ele != select_all_node) {
             oManager.slideUp(ele);
           }
@@ -97,12 +101,14 @@ var proto_select_simulate = (function() {
       })
     })
 
-    document.addEventListener("click", function(event) {
-      var select_all_array = oManager.getDomArray(select_all_nodes);
-      select_all_array.forEach(function(ele) {
-        oManager.slideUp(ele);
+    if (!documentEvent) {
+      document.addEventListener("click", function(event) {
+        var select_all_array = oManager.getDomArray(select_all_nodes);
+        select_all_array.forEach((ele) => oManager.slideUp(ele))
       })
-    })
+      documentEvent = true;
+    }
+
 
     this.addEventListener("click", function(event) {
 

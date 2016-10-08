@@ -4,8 +4,10 @@ $.fn.select = function(options) {
     select_map: new WeakMap()
   };
   var options = $.extend(true, {}, default_option, options);
-  var select_map = options.select_map
-    // 根据节点计算高度
+  var select_map = options.select_map;
+  var select_all_nodes = [];
+  var documentEvent = false;
+  // 根据节点计算高度
   function heightSlide(node, status) {
     var height = 0;
     if (status) {
@@ -63,7 +65,8 @@ $.fn.select = function(options) {
     var $this = $(this);
     var show_select = $this.find(".show_select");
     var select_all = $this.find(".select_all");
-    var select_all_nodes = document.querySelectorAll(".select_all");
+    select_all_nodes.push(this.querySelector(".select_all"));
+    // var select_all_nodes = document.querySelectorAll(".select_all");
     var select_item = ".select_item"
     var imitate_select = $this;
 
@@ -93,13 +96,13 @@ $.fn.select = function(options) {
       })
     })
 
-    $(document).on("click", function(event) {
-      // 将所有的select all 收起来
-      var select_all_array = oManager.getDomArray(select_all_nodes);
-      select_all_array.forEach(function(ele) {
-        oManager.slideUp(ele);
+    if (!documentEvent) {
+      document.addEventListener("click", function(event) {
+        var select_all_array = oManager.getDomArray(select_all_nodes);
+        select_all_array.forEach((ele) => oManager.slideUp(ele))
       })
-    })
+      documentEvent = true;
+    }
 
     $(document).on("click", select_item, function(event) {
       event.stopPropagation();
